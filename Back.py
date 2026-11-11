@@ -6,7 +6,8 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
-
+global o
+o=[]
 global l_action
 l_action=[]
 global l_path
@@ -61,6 +62,7 @@ def clean_and_organize_directory(target_path):
     
     # Track how many files were moved
     moved_count = 0
+    directory_count=1
 
     for item in directory.iterdir():
         # Skip directories to avoid organizing already-sorted folders
@@ -85,12 +87,67 @@ def clean_and_organize_directory(target_path):
             shutil.move(str(item), str(destination_folder / item.name))
             moved_count += 1
         except Exception as e:
-            print(f"Could not move {item.name}: {e}")
-
+            messagebox.showerror(
+                            title="Error",
+                            message=(f"Could not move {item.name}: {e}")
+                        )
     messagebox.showinfo(
                 title="Sorting Complete",
                 message="🎉 Success! All Files were Sorted."
             )
+    return moved_count
+
+
+def delete_files(file_paths: list[str | Path]) -> None:
+    """Deletes a list of files safely and shows a single summary pop-up alert."""
+    # Create a hidden root window so only the pop-up box appears
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes("-topmost", True)  # Keeps pop-ups on top of other windows
+
+    try:
+        if not file_paths:
+            messagebox.showwarning("Warning", "NOOOOOOOO")
+            return
+
+        deleted = []
+        skipped = []
+        errors = []
+
+        for path in file_paths:
+            file = Path(path)
+            try:
+                file.unlink(missing_ok=True)
+                deleted.append(str(file))
+            except IsADirectoryError:
+                skipped.append(f"{file} (is a directory, not a file)")
+            except PermissionError:
+                errors.append(f"{file} (permission denied)")
+            except Exception as e:
+                errors.append(f"{file} ({e})")
+
+        # Build the single summary message
+        summary_lines = []
+        if deleted:
+            summary_lines.append("Deleted:\n" + "\n".join(f"• {f}" for f in deleted))
+        if skipped:
+            summary_lines.append("Skipped:\n" + "\n".join(f"• {f}" for f in skipped))
+        if errors:
+            summary_lines.append("Errors:\n" + "\n".join(f"• {f}" for f in errors))
+
+        summary_message = "\n\n".join(summary_lines)
+
+        # Show one final pop-up based on whether any errors/warnings occurred
+        if errors:
+            messagebox.showerror("Deletion Complete (with errors)", summary_message)
+        elif skipped:
+            messagebox.showwarning("Deletion Complete (with warnings)", summary_message)
+        else:
+            messagebox.showinfo("Success", summary_message)
+
+    finally:
+        # Clean up the hidden window when finished
+        root.destroy()
 
 
 def select_directory():
@@ -108,6 +165,23 @@ def select_directory():
     else:
         print("No folder was selected.")
         return None
+
+def The_Sorter(x,path):
+    for widget in x.winfo_children():
+            widget.destroy()
+    a=clean_and_organize_directory(path)
+    moved_count_label=tk.Label(x,text=(f"No.of Files moved {a}"))
+    moved_count_label.pack()
+    
+
+def scan(listbox, target_directory):
+    o.clear()
+    o.extend(find_duplicate_files(target_directory))
+    for item in o:
+        listbox.insert(tk.END, item)
+
+
+
 
 def find_duplicate_files(target_directory):
     if not target_directory:

@@ -59,7 +59,7 @@ def home_screen():
     title = Label(main_bar, text="Welcome Home", font=("Arial", 32, "bold"), bg="#111010", fg="white")
     title.pack(pady=40, anchor=W, padx=40)
     if l_action==["Delete Duplicate Files"]:
-        x=Frame(main_bar)
+        x=Frame(main_bar,bg="#111010")
         x.pack()
         scrollbar = ttk.Scrollbar(x, orient="vertical")
         listbox = tk.Listbox(
@@ -78,18 +78,18 @@ def home_screen():
         scrollbar.pack(side="right", fill="y")
 
         a=Path(l_path[0])
-        o=find_duplicate_files(a)
+        print(o)
 
-        for item in o:
-            listbox.insert(tk.END, item)
-
-        delete_btn=Button(x,text="Delete All Duplicate Files")
+        delete_btn=Button(x,text="Delete All Duplicate Files",bg="#182F7B",fg='white',command=lambda:delete_files(o))
         delete_btn.pack()
+        Scan_btn=Button(x,text="Scan For All Duplicate Files",bg="#182F7B",fg='white',command=lambda: scan(listbox,a))
+        Scan_btn.pack()
     elif l_action==["Sort files"]:
-        x=Frame(main_bar)
+        x=Frame(main_bar,bg="#111010")
         x.pack()
         a=Path(l_path[0])
-        
+        sort_btn=Button(x,text='Sort The Directory',bg="#182F7B",fg='white',command=lambda: The_Sorter(x,a))
+        sort_btn.pack()
 
     
 def sett_screen():
@@ -123,7 +123,7 @@ def sett_screen():
     path_select=Button(z,text='-',command=lambda:slect(path_entry))
     path_select.pack(side=LEFT,anchor=N)
 
-    apply_btn=Button(main_bar,text='APPLY',fg='white',bg="#0D1A46",command=lambda:apply(choice_box,path_entry))
+    apply_btn=Button(main_bar,text='APPLY',fg='white',bg="#182F7B",command=lambda:apply(choice_box,path_entry))
     apply_btn.pack()
 
 
