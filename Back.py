@@ -6,15 +6,25 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
-from Front import*
 
 global l_action
 l_action=[]
+global l_path
+l_path=[]
 
-def apply(box):
+def slect(entry):
+    entry.delete(0,tk.END)
+    z=select_directory()
+    entry.insert(0, str(z))
+
+def apply(combobox,entry):
     l_action.clear()
-    g=box.get()
+    g=combobox.get()
     l_action.append(g)
+
+    l_path.clear()
+    g=entry.get()
+    l_path.append(g)
 
 def show_native_popups():
     # Create the root window and hide it immediately
@@ -41,6 +51,12 @@ def show_native_popups():
     )
 
 def clean_and_organize_directory(target_path):
+    if not target_path:
+            messagebox.showwarning(
+                title="No Selection",
+                message="No folder was selected! The scan has been cancelled."
+            )
+            return []
     directory = Path(target_path)
     
     # Track how many files were moved
@@ -71,8 +87,10 @@ def clean_and_organize_directory(target_path):
         except Exception as e:
             print(f"Could not move {item.name}: {e}")
 
-    print(f"Clean-up complete! Organized {moved_count} files.")
-
+    messagebox.showinfo(
+                title="Sorting Complete",
+                message="🎉 Success! All Files were Sorted."
+            )
 
 
 def select_directory():
@@ -91,40 +109,26 @@ def select_directory():
         print("No folder was selected.")
         return None
 
-
-
-def clean_duplicate_files():
-    """
-    Opens a folder selection dialog, finds duplicate files using MD5 hashes,
-    keeps the first discovered instance, and deletes all other copies.
-    """
-    # 1. Open the system's native folder picker
-    root = tk.Tk()
-    root.withdraw()  # Hide the main blank Tkinter window
-    
-    target_directory = filedialog.askdirectory(title="Select Folder to Clean Duplicates From")
-    
-    # 2. Trigger an alert popup if no folder was chosen
+def find_duplicate_files(target_directory):
     if not target_directory:
         messagebox.showwarning(
-            title="No Selection", 
+            title="No Selection",
             message="No folder was selected! The scan has been cancelled."
         )
-        return
+        return []
 
-    print(f"Scanning and cleaning directory: {target_directory}...\n")
-    
-    # 3. Track files using a dictionary: { file_hash: [list_of_filepaths] }
+    print(f"Scanning directory for duplicates: {target_directory}...\n")
+
+    # Track files using a dictionary: { file_hash: [list_of_filepaths] }
     hashes_dict = {}
-    
-    # 4. Walk through all files and subfolders to map hashes
+
+    # Walk through all files and subfolders to map hashes
     for root_dir, _, files in os.walk(target_directory):
         for file in files:
             full_path = os.path.join(root_dir, file)
-            
             if not os.path.exists(full_path):
                 continue
-                
+
             try:
                 # Read file in chunks to keep memory usage low
                 hasher = hashlib.md5()
@@ -132,48 +136,46 @@ def clean_duplicate_files():
                     while chunk := f.read(8192):
                         hasher.update(chunk)
                 file_hash = hasher.hexdigest()
-                
+
                 if file_hash in hashes_dict:
                     hashes_dict[file_hash].append(full_path)
                 else:
                     hashes_dict[file_hash] = [full_path]
+
             except (PermissionError, FileNotFoundError):
                 continue
 
-    # 5. Iterate through mapped files and delete extra instances
-    deleted_count = 0
-    space_saved = 0
-    
+    # Collect all extra duplicate instances into a list
+    duplicate_files = []
+    wasted_space = 0
+
     for file_hash, paths in hashes_dict.items():
         if len(paths) > 1:
-            # Keep the very first file found as the original copy
-            original = paths[0]
-            duplicates_to_remove = paths[1:]
-            
-            for dup_path in duplicates_to_remove:
+            # Skip paths[0] (the original) and grab all extra copies
+            duplicates = paths[1:]
+            duplicate_files.extend(duplicates)
+
+            # Calculate wasted space without deleting anything
+            for dup_path in duplicates:
                 try:
-                    # Get file size before deleting to track total storage saved
-                    file_size = os.path.getsize(dup_path)
-                    
-                    # Permanently delete the duplicate file
-                    os.remove(dup_path)
-                    
-                    deleted_count += 1
-                    space_saved += file_size
-                except Exception as e:
-                    print(f"  ⚠️ Error deleting {dup_path}: {e}")
-                    
-    # 6. Show the final result in a top-layer popup window
-    if deleted_count == 0:
+                    wasted_space += os.path.getsize(dup_path)
+                except OSError:
+                    pass
+
+    # Show the final result in a popup window
+    if not duplicate_files:
         messagebox.showinfo(
-            title="Clean-up Complete", 
+            title="Scan Complete",
             message="🎉 Success! No duplicate files were found."
         )
     else:
-        mb_saved = space_saved / (1024 * 1024)
+        mb_wasted = wasted_space / (1024 * 1024)
         messagebox.showinfo(
-            title="Clean-up Successful", 
-            message=f"🧹 Clean-up complete!\n\n• Removed {deleted_count} duplicate files.\n• Recovered {mb_saved:.2f} MB of storage space."
+            title="Scan Complete",
+            message=f"🔍 Scan complete!\n\n• Found {len(duplicate_files)} duplicate files.\n• Taking up {mb_wasted:.2f} MB of extra space."
         )
+
+    return duplicate_files
+
 
 

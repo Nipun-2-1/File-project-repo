@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkmacosx import Button 
-import Back as bk
+from Back import *
 
 
 def clear_main_frame():
@@ -58,6 +58,39 @@ def home_screen():
     clear_main_frame()
     title = Label(main_bar, text="Welcome Home", font=("Arial", 32, "bold"), bg="#111010", fg="white")
     title.pack(pady=40, anchor=W, padx=40)
+    if l_action==["Delete Duplicate Files"]:
+        x=Frame(main_bar)
+        x.pack()
+        scrollbar = ttk.Scrollbar(x, orient="vertical")
+        listbox = tk.Listbox(
+            x,
+            height=30,
+            width=60,
+            yscrollcommand=scrollbar.set,
+            selectmode="extended",
+        )
+
+        # 3. Connect the Scrollbar to the Listbox view
+        scrollbar.config(command=listbox.yview)
+
+        # 4. Pack them side-by-side
+        listbox.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        a=Path(l_path[0])
+        o=find_duplicate_files(a)
+
+        for item in o:
+            listbox.insert(tk.END, item)
+
+        delete_btn=Button(x,text="Delete All Duplicate Files")
+        delete_btn.pack()
+    elif l_action==["Sort files"]:
+        x=Frame(main_bar)
+        x.pack()
+        a=Path(l_path[0])
+        
+
     
 def sett_screen():
     clear_main_frame()
@@ -67,17 +100,31 @@ def sett_screen():
     k=Frame(main_bar,bg='#1e1e1e')
     k.pack()
 
+    z=Frame(main_bar,bg='#1e1e1e')
+    z.pack(pady=10)
+
     choose_label=Label(k,text='Choose an Action To Perform',width=30)
     choose_label.pack(side=LEFT,padx=10,pady=10,anchor=N)
 
-    n=StringVar()
-    choice_box=ttk.Combobox(k,textvariable=n,width=50)
+    choice_box=ttk.Combobox(k,width=50)
     choice_box['values']=("Sort files","Delete Duplicate Files")
     choice_box['state']='readonly'
     choice_box.pack(side=LEFT,padx=10,pady=10,anchor=N)
+    for a in l_action:
+        choice_box.set(a)
 
-    apply_btn=Button(main_bar,text='APPLY',fg='white',bg="#0D1A46",command=bk.apply(choice_box))
-    apply_btn.pack(side=TOP,padx=10,pady=10)
+    enter_path_label=Label(z,text="Enter the path to file/directory",width=30)
+    enter_path_label.pack(side=LEFT,padx=10,pady=10,anchor=N)
+    path_entry=Entry(z,fg='black',bg='white',width=50)
+    path_entry.pack(side=LEFT,padx=10,pady=10,anchor=N)
+    for a in l_path:
+        path_entry.insert(0,a)
+
+    path_select=Button(z,text='-',command=lambda:slect(path_entry))
+    path_select.pack(side=LEFT,anchor=N)
+
+    apply_btn=Button(main_bar,text='APPLY',fg='white',bg="#0D1A46",command=lambda:apply(choice_box,path_entry))
+    apply_btn.pack()
 
 
 # Main Window Setup
