@@ -6,6 +6,15 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
+from Front import*
+
+global l_action
+l_action=[]
+
+def apply(box):
+    l_action.clear()
+    g=box.get()
+    l_action.append(g)
 
 def show_native_popups():
     # Create the root window and hide it immediately
@@ -64,10 +73,6 @@ def clean_and_organize_directory(target_path):
 
     print(f"Clean-up complete! Organized {moved_count} files.")
 
-if __name__ == "__main__":
-    # Replace with the path of the messy folder
-    folder_to_clean = "./my_download_folder"
-    clean_and_organize_directory(folder_to_clean)
 
 
 def select_directory():
