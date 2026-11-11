@@ -1,4 +1,3 @@
-
 import os
 import hashlib
 import shutil
@@ -33,23 +32,13 @@ def show_native_popups():
     root = tk.Tk()
     root.withdraw()
     
-    # 1. Informational Popup Window
-    messagebox.showinfo(
-        title="Operation Successful",
-        message="🎉 Your process completed without any errors!"
-    )
     
     # 2. Warning Alert Popup Window
     messagebox.showwarning(
         title="Action Required",
         message="⚠️ No directory was selected. Please choose a folder."
     )
-    
-    # 3. Error Popup Window
-    messagebox.showerror(
-        title="System Error",
-        message="❌ Critical Error: Unable to access system files."
-    )
+
 
 def clean_and_organize_directory(target_path):
     if not target_path:
@@ -98,7 +87,7 @@ def clean_and_organize_directory(target_path):
     return moved_count
 
 
-def delete_files(file_paths: list[str | Path]) -> None:
+def delete_files(listbox,file_paths: list[str | Path]) -> None:
     """Deletes a list of files safely and shows a single summary pop-up alert."""
     # Create a hidden root window so only the pop-up box appears
     root = tk.Tk()
@@ -148,6 +137,8 @@ def delete_files(file_paths: list[str | Path]) -> None:
     finally:
         # Clean up the hidden window when finished
         root.destroy()
+        listbox.delete(0, tk.END)
+        
 
 
 def select_directory():
@@ -166,6 +157,7 @@ def select_directory():
         print("No folder was selected.")
         return None
 
+
 def The_Sorter(x,path):
     for widget in x.winfo_children():
             widget.destroy()
@@ -179,7 +171,6 @@ def scan(listbox, target_directory):
     o.extend(find_duplicate_files(target_directory))
     for item in o:
         listbox.insert(tk.END, item)
-
 
 
 
@@ -250,6 +241,3 @@ def find_duplicate_files(target_directory):
         )
 
     return duplicate_files
-
-
-

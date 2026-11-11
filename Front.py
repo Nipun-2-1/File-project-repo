@@ -49,9 +49,6 @@ def Main_bar():
     global main_bar
     main_bar = Frame(t, bg="#111010")
     main_bar.pack(side=RIGHT, fill=BOTH, expand=True)
-    
-    welcome_lbl = Label(main_bar, text="Dashboard Area", font=("Arial", 24), bg="#111010", fg="gray")
-    welcome_lbl.pack(expand=True)
     home_screen()
 
 def home_screen():
@@ -77,19 +74,34 @@ def home_screen():
         listbox.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        a=Path(l_path[0])
-        print(o)
+        if l_path and l_path[0]!='':
+            a=Path(l_path[0])
+            delete_btn=Button(x,text="Delete All Duplicate Files",bg="#182F7B",fg='white',command=lambda:delete_files(listbox,o))
+            delete_btn.pack()
+            Scan_btn=Button(x,text="Scan For All Duplicate Files",bg="#182F7B",fg='white',command=lambda: scan(listbox,a))
+            Scan_btn.pack()
+        else:
+            show_native_popups()
+            sett_screen()
 
-        delete_btn=Button(x,text="Delete All Duplicate Files",bg="#182F7B",fg='white',command=lambda:delete_files(o))
-        delete_btn.pack()
-        Scan_btn=Button(x,text="Scan For All Duplicate Files",bg="#182F7B",fg='white',command=lambda: scan(listbox,a))
-        Scan_btn.pack()
+        
+
     elif l_action==["Sort files"]:
         x=Frame(main_bar,bg="#111010")
         x.pack()
-        a=Path(l_path[0])
-        sort_btn=Button(x,text='Sort The Directory',bg="#182F7B",fg='white',command=lambda: The_Sorter(x,a))
-        sort_btn.pack()
+        if l_path and l_path[0]!='':
+            a=Path(l_path[0])
+            sort_btn=Button(x,text='Sort The Directory',bg="#182F7B",fg='white',command=lambda: The_Sorter(x,a))
+            sort_btn.pack()
+        else:
+            show_native_popups()
+            sett_screen()
+
+    else:
+        x=Frame(main_bar,bg="#111010")
+        x.pack()
+        welcome_lbl = Label(x, text="Please Configure the Settings", font=("Arial", 24), bg="#111010", fg="gray")
+        welcome_lbl.pack(expand=True,pady=200,padx=100)
 
     
 def sett_screen():
