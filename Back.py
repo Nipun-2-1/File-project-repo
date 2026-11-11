@@ -138,7 +138,6 @@ def delete_files(listbox,file_paths: list[str | Path]) -> None:
         # Clean up the hidden window when finished
         root.destroy()
         listbox.delete(0, tk.END)
-        
 
 
 def select_directory():

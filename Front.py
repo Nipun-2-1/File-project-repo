@@ -133,7 +133,7 @@ def sett_screen():
         path_entry.insert(0,a)
 
     path_select=Button(z,text='-',command=lambda:slect(path_entry))
-    path_select.pack(side=LEFT,anchor=N)
+    path_select.pack(side=LEFT,anchor=N,pady=10)
 
     apply_btn=Button(main_bar,text='APPLY',fg='white',bg="#182F7B",command=lambda:apply(choice_box,path_entry))
     apply_btn.pack()
